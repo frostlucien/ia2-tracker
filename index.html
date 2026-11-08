@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IA2 Exam Tracker | Semester 1</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --accent: #38bdf8;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #22c55e;
+      --pending: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 24px 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    header {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .countdown {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    /* Overall Progress Card */
+    .progress-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .progress-stats {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 14px;
+      background: #0f172a;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #38bdf8, #22c55e);
+      transition: width 0.4s ease;
+    }
+
+    /* Subjects Grid */
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .sub-count {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: #0f172a;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .item-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.6);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .item:hover {
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .item input[type="checkbox"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--accent);
+      border-radius: 4px;
+      display: grid;
+      place-content: center;
+      cursor: pointer;
+    }
+
+    .item input[type="checkbox"]::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      transform: scale(0);
+      background: var(--success);
+      border-radius: 2px;
+      transition: 0.15s transform ease-in-out;
+    }
+
+    .item input[type="checkbox"]:checked {
+      border-color: var(--success);
+    }
+
+    .item input[type="checkbox"]:checked::before {
+      transform: scale(1);
+    }
+
+    .item-text {
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .item.completed .item-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    /* Reset button */
+    .actions {
+      margin-top: 24px;
+      text-align: center;
+    }
+
+    button.reset-btn {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    button.reset-btn:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎯 IA2 Preparation Dashboard</h1>
+      <p class="countdown">Exam Date: <b>23 November 2026</b></p>
+    </header>
+
+    <div class="progress-card">
+      <div class="progress-stats">
+        <span>Total Completion</span>
+        <span id="percent-text">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+      <div style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted); text-align: right;" id="count-text">
+        0 / 15 Completed
+      </div>
+    </div>
+
+    <div class="subjects-grid" id="subjects-grid"></div>
+
+    <div class="actions">
+      <button class="reset-btn" onclick="resetAll()">Reset All Progress</button>
+    </div>
+  </div>
+
+  <script>
+    const syllabus = {
+      "Physics": [
+        "Quantum Physics",
+        "Introduction to Semiconductor",
+        "Optics"
+      ],
+      "Chemistry": [
+        "Introduction to Polymers",
+        "Introduction to Composites",
+        "Green Chemistry for Sustainable Development"
+      ],
+      "Mechanics": [
+        "Kinematics of Particles",
+        "Friction",
+        "Kinetics of Particles (Work-Energy & D'Alembert)"
+      ],
+      "Maths": [
+        "Partial Differentiation",
+        "Application of Partial Differentiation",
+        "Matrices"
+      ],
+      "BEE": [
+        "AC Circuit",
+        "Single Phase Transformer",
+        "Electrical Machines"
+      ]
+    };
+
+    const STORAGE_KEY = "ia2_tracker_status";
+    let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+    function render() {
+      const container = document.getElementById("subjects-grid");
+      container.innerHTML = "";
+
+      let totalItems = 0;
+      let completedItems = 0;
+
+      for (const [subject, chapters] of Object.entries(syllabus)) {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        let subDone = 0;
+        chapters.forEach((ch) => {
+          if (state[`${subject}_${ch}`]) subDone++;
+        });
+
+        const header = document.createElement("div");
+        header.className = "card-header";
+        header.innerHTML = `
+          <div class="card-title">${subject}</div>
+          <div class="sub-count">${subDone}/${chapters.length}</div>
+        `;
+        card.appendChild(header);
+
+        const list = document.createElement("ul");
+        list.className = "item-list";
+
+        chapters.forEach((chapter) => {
+          totalItems++;
+          const key = `${subject}_${chapter}`;
+          const isDone = !!state[key];
+          if (isDone) completedItems++;
+
+          const li = document.createElement("li");
+          li.className = `item ${isDone ? "completed" : ""}`;
+          li.onclick = () => toggle(key);
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = isDone;
+          checkbox.readOnly = true;
+
+          const span = document.createElement("span");
+          span.className = "item-text";
+          span.innerText = chapter;
+
+          li.appendChild(checkbox);
+          li.appendChild(span);
+          list.appendChild(li);
+        });
+
+        card.appendChild(list);
+        container.appendChild(card);
+      }
+
+      // Update progress bar
+      const percentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+      document.getElementById("progress-bar").style.width = percentage + "%";
+      document.getElementById("percent-text").innerText = percentage + "%";
+      document.getElementById("count-text").innerText = `${completedItems} of ${totalItems} Chapters Done`;
+    }
+
+    function toggle(key) {
+      state[key] = !state[key];
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+    }
+
+    function resetAll() {
+      if (confirm("Are you sure you want to reset all progress?")) {
+        state = {};
+        localStorage.removeItem(STORAGE_KEY);
+        render();
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
